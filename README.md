@@ -50,6 +50,10 @@ https://raw.githubusercontent.com/beemo37/chrome-fullscreen-ext/main/userscript/
 
 > 如果打开链接只看到篡改猴的 `SCRIPT INSTALLATION` 白页、没有安装确认框，就是脚本没下载下来（raw 域名在国内常年不稳）。换上面的 jsDelivr 链接，或者手动导入：打开任一链接把内容复制下来，在篡改猴面板里点"添加新脚本"，全选粘贴后 `Ctrl+S` 保存。
 
+> 维护提示：jsDelivr 对 `@main` 这种分支引用有缓存（最长 12 小时），推了新版本可能取到旧的。要立刻生效可以清缓存
+> `curl https://purge.jsdelivr.net/gh/beemo37/chrome-fullscreen-ext@main/userscript/one-click-fullscreen.user.js`，
+> 或者把链接里的 `@main` 换成具体的 commit hash / tag，那是不可变的、不会取到旧内容。
+
 它实现的是同一条主路径（`Alt+Shift+F` + `Esc` + 尺寸天然还原），但少两件事：没有工具栏图标入口；页面禁用 Fullscreen API 时没有窗口全屏兜底。本地 `file://` 页面需要在篡改猴设置里打开 **"允许访问文件网址"**。
 
 > 新版 Chrome 对用户脚本有额外限制：需要在 `chrome://extensions` 打开 **开发者模式**（部分版本显示为"允许用户脚本"开关），否则篡改猴装了脚本也不会执行。
