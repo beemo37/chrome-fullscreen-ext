@@ -6,8 +6,8 @@
 // @author       beemo37
 // @homepageURL  https://github.com/beemo37/chrome-fullscreen-ext
 // @supportURL   https://github.com/beemo37/chrome-fullscreen-ext/issues
-// @updateURL    https://raw.githubusercontent.com/beemo37/chrome-fullscreen-ext/main/userscript/one-click-fullscreen.user.js
-// @downloadURL  https://raw.githubusercontent.com/beemo37/chrome-fullscreen-ext/main/userscript/one-click-fullscreen.user.js
+// @updateURL    https://cdn.jsdelivr.net/gh/beemo37/chrome-fullscreen-ext@main/userscript/one-click-fullscreen.user.js
+// @downloadURL  https://cdn.jsdelivr.net/gh/beemo37/chrome-fullscreen-ext@main/userscript/one-click-fullscreen.user.js
 // @match        *://*/*
 // @include      file:///*
 // @run-at       document-start

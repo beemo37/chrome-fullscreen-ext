@@ -34,13 +34,25 @@ git clone <本仓库地址>
 
 ### 方式三：篡改猴用户脚本（最省事，不装扩展）
 
-不想装扩展的话，仓库里有逻辑等价的用户脚本 [userscript/one-click-fullscreen.user.js](userscript/one-click-fullscreen.user.js)。装好 [篡改猴](https://www.tampermonkey.net/) 后，直接打开这个链接就会弹出安装确认：
+不想装扩展的话，仓库里有逻辑等价的用户脚本 [userscript/one-click-fullscreen.user.js](userscript/one-click-fullscreen.user.js)。装好 [篡改猴](https://www.tampermonkey.net/) 后，直接打开下面任一链接就会弹出安装确认：
+
+**推荐（jsDelivr CDN，国内可达）：**
+
+```
+https://cdn.jsdelivr.net/gh/beemo37/chrome-fullscreen-ext@main/userscript/one-click-fullscreen.user.js
+```
+
+**备选（GitHub raw，国内经常超时）：**
 
 ```
 https://raw.githubusercontent.com/beemo37/chrome-fullscreen-ext/main/userscript/one-click-fullscreen.user.js
 ```
 
+> 如果打开链接只看到篡改猴的 `SCRIPT INSTALLATION` 白页、没有安装确认框，就是脚本没下载下来（raw 域名在国内常年不稳）。换上面的 jsDelivr 链接，或者手动导入：打开任一链接把内容复制下来，在篡改猴面板里点"添加新脚本"，全选粘贴后 `Ctrl+S` 保存。
+
 它实现的是同一条主路径（`Alt+Shift+F` + `Esc` + 尺寸天然还原），但少两件事：没有工具栏图标入口；页面禁用 Fullscreen API 时没有窗口全屏兜底。本地 `file://` 页面需要在篡改猴设置里打开 **"允许访问文件网址"**。
+
+> 新版 Chrome 对用户脚本有额外限制：需要在 `chrome://extensions` 打开 **开发者模式**（部分版本显示为"允许用户脚本"开关），否则篡改猴装了脚本也不会执行。
 
 ## 使用
 
