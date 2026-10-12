@@ -32,6 +32,16 @@ git clone <本仓库地址>
 
 然后把仓库目录本身作为"已解压的扩展程序"加载即可。
 
+### 方式三：篡改猴用户脚本（最省事，不装扩展）
+
+不想装扩展的话，仓库里有逻辑等价的用户脚本 [userscript/one-click-fullscreen.user.js](userscript/one-click-fullscreen.user.js)。装好 [篡改猴](https://www.tampermonkey.net/) 后，直接打开这个链接就会弹出安装确认：
+
+```
+https://raw.githubusercontent.com/beemo37/chrome-fullscreen-ext/main/userscript/one-click-fullscreen.user.js
+```
+
+它实现的是同一条主路径（`Alt+Shift+F` + `Esc` + 尺寸天然还原），但少两件事：没有工具栏图标入口；页面禁用 Fullscreen API 时没有窗口全屏兜底。本地 `file://` 页面需要在篡改猴设置里打开 **"允许访问文件网址"**。
+
 ## 使用
 
 | 操作 | 效果 |
@@ -55,6 +65,7 @@ manifest.json        扩展清单（MV3）
 page-fullscreen.js   内容脚本：捕获按键，调用 Fullscreen API（主路径）
 background.js        service worker：窗口全屏兜底路径 + 尺寸还原
 icons/               图标
+userscript/          篡改猴用户脚本版（等价主路径，不需要装扩展）
 ```
 
 ## 版本
