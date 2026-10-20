@@ -8,9 +8,9 @@
 // 用 chrome.windows.update 的「窗口全屏」顶上去。它会慢、有动画，退出时还得
 // 自己还原尺寸（见下面第 2 条），所以只当备用。
 //
-// 1. 兜底全屏后 Esc 要能退：窗口全屏不认 Esc，靠内容脚本上报。
-//    只对「确实是我们自己用窗口全屏进的」窗口生效 —— 元素全屏时
-//    chrome.windows 读到的 state 也可能是 fullscreen，无脑响应会误伤。
+// 1. 窗口全屏不认 Esc：靠内容脚本上报（元素全屏时内容脚本自己会跳过，
+//    浏览器原生处理）。这里只判断「窗口当前是否 fullscreen」——
+//    不能只认「我们自己进的全屏」，否则 ⌃⌘F / F11 进的原生全屏 Esc 就没反应。
 // 2. 兜底全屏退出后尺寸不对：update({state:'normal'}) 用的是窗口的
 //    「还原尺寸」，不等于全屏前的尺寸。所以进全屏前把 bounds / 原 state
 //    记下来，退出时按记录还原。
@@ -28,9 +28,6 @@ const SETTLE_MS = 300;
 
 /** windowId -> 进入窗口全屏前的 {state, left, top, width, height} */
 const savedWindowState = new Map();
-
-/** 我们自己用 chrome.windows 造成窗口全屏的 windowId（元素全屏不记在这里） */
-const ourWindowFullscreen = new Set();
 
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -80,7 +77,6 @@ async function enterWindowFullscreen(win) {
     width: win.width,
     height: win.height
   });
-  ourWindowFullscreen.add(win.id);
   await chrome.windows.update(win.id, { state: 'fullscreen' });
   log('兜底：进入窗口全屏后', describe(await getWindow(win.id)));
 }
@@ -88,7 +84,6 @@ async function enterWindowFullscreen(win) {
 async function exitWindowFullscreen(win) {
   const saved = savedWindowState.get(win.id);
   savedWindowState.delete(win.id);
-  ourWindowFullscreen.delete(win.id);
 
   // 没有记录（比如窗口是被原生 F11 / ⌃⌘F 全屏的）：只退回普通状态。
   if (!saved) {
@@ -192,18 +187,20 @@ chrome.runtime.onMessage.addListener((message, sender) => {
     return;
   }
 
-  // 窗口全屏兜底状态下的 Esc。只认我们自己造成的窗口全屏。
+  // 窗口全屏下的 Esc（含 ⌃⌘F / F11 的原生全屏）。
+  // 判断依据是「窗口当前是不是 fullscreen」，不追查是谁进的全屏 ——
+  // 只认自己进的全屏，原生全屏按 Esc 就没反应了。
+  // 元素全屏的 Esc 由浏览器原生处理，内容脚本那边已经提前 return 了。
   if (message.type === 'escape-pressed') {
-    if (windowId == null || !ourWindowFullscreen.has(windowId)) return;
-    log('Esc：退出窗口全屏兜底');
+    if (windowId == null) return;
+    log('Esc：退出窗口全屏');
     getWindow(windowId).then((win) => {
       if (win && win.state === 'fullscreen') return exitWindowFullscreen(win);
     });
   }
 });
 
-// 窗口关掉时清掉记录，别让两个集合无限增长
+// 窗口关掉时清掉记录，别让 Map 无限增长
 chrome.windows.onRemoved.addListener((windowId) => {
   savedWindowState.delete(windowId);
-  ourWindowFullscreen.delete(windowId);
 });
