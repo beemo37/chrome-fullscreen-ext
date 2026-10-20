@@ -68,6 +68,8 @@ https://raw.githubusercontent.com/beemo37/chrome-fullscreen-ext/main/userscript/
 
 快捷键可在 `page-fullscreen.js` 顶部的 `KEY_CODE` / `NEEDS_ALT` / `NEEDS_SHIFT` 里改。
 
+> **扩展和用户脚本只需装一个。** 两个同时启用时，1.1 起有按键认领机制兜底（一次按键只会有一个生效），但仍然建议只留一个，省得排查问题时混淆。
+
 ## 已知限制
 
 - **`chrome://` 页面、新标签页、Chrome 应用商店、内置 PDF 查看器**：内容脚本无法注入，`Alt+Shift+F` 无反应。这些页面请用 `⌃⌘F` / `F11`，或点工具栏图标走兜底路径。
@@ -86,4 +88,5 @@ userscript/          篡改猴用户脚本版（等价主路径，不需要装�
 
 ## 版本
 
+- **1.1** —— 加了按键认领机制：扩展和用户脚本（或两份扩展）同时启用时，一次按键只允许一个处理器动作，避免互相抵消导致快捷键失灵。
 - **1.0** —— 第一版。主路径改为 Fullscreen API，`Esc` 原生退出，窗口尺寸天然还原。

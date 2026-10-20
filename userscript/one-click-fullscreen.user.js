@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         一键全屏（Alt+Shift+F）
 // @namespace    https://github.com/beemo37/chrome-fullscreen-ext
-// @version      1.0
+// @version      1.1
 // @description  按 Alt+Shift+F 让当前网页全屏 / 退出；Esc 原生退出，窗口尺寸天然还原
 // @author       beemo37
 // @homepageURL  https://github.com/beemo37/chrome-fullscreen-ext
@@ -36,6 +36,23 @@
     return !!(document.fullscreenElement || document.webkitFullscreenElement);
   }
 
+  // 同一次按键可能被多个处理器看到：扩展和油猴脚本同时装了、或者装了两份扩展。
+  // 各自都 toggle 一遍会互相抵消 —— 一个调 exitFullscreen() 之后
+  // document.fullscreenElement 立刻变 null，另一个读到「不是全屏」又去
+  // requestFullscreen()，表现为快捷键失灵。用 DOM 上的时间戳认领，
+  // 保证一次按键只动作一次。DOM 属性跨执行环境共享，扩展那边也认这同一个 key。
+  const CLAIM_KEY = 'oneClickFullscreenAt';
+  const CLAIM_WINDOW_MS = 300;
+
+  function claimKeypress() {
+    const el = document.documentElement;
+    const now = Date.now();
+    const last = Number(el.dataset[CLAIM_KEY] || 0);
+    if (now - last < CLAIM_WINDOW_MS) return false;
+    el.dataset[CLAIM_KEY] = String(now);
+    return true;
+  }
+
   document.addEventListener(
     'keydown',
     async (event) => {
@@ -46,6 +63,8 @@
       // 先拦住，别让快捷键在输入框里变成字符，也别让页面自己的处理重复响应
       event.preventDefault();
       event.stopPropagation();
+
+      if (!claimKeypress()) return; // 已经被另一个处理器认领，别重复 toggle
 
       if (isPageFullscreen()) {
         try {
