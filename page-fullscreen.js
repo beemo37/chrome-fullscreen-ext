@@ -95,3 +95,12 @@ document.addEventListener(
   },
   true
 );
+
+// 让 background 能问「这个标签页里有没有内容脚本」。
+// 没有就说明是 chrome:// 这类注入不了的页面，那边不应该用窗口全屏兜底 ——
+// 进去之后 Esc 没人上报、工具栏图标又被全屏挡住，会卡在里面出不来。
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message && message.type === 'ping') {
+    sendResponse({ pong: true });
+  }
+});

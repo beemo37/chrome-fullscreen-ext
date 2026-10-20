@@ -155,10 +155,29 @@ async function toggleWindowFullscreen(windowId) {
 
 // ---------- 入口 ----------
 
-// 工具栏图标：进不去内容脚本的页面（chrome:// 等）只能靠它走兜底路径。
-chrome.action.onClicked.addListener((tab) => {
+/** 这个标签页里有没有我们的内容脚本（chrome:// 等注入不了的页面没有）。 */
+async function hasContentScript(tabId) {
+  if (tabId == null) return false;
+  try {
+    const reply = await chrome.tabs.sendMessage(tabId, { type: 'ping' });
+    return !!(reply && reply.pong);
+  } catch {
+    return false;
+  }
+}
+
+// 工具栏图标：窗口全屏兜底。
+// 但只在「页面有内容脚本」时才用 —— 否则进去以后 Esc 没人上报（内容脚本不存在），
+// 工具栏图标又被全屏挡住，用户只能靠 ⌃⌘F / F11 才出得来。
+// chrome:// 这类页面就干脆不提供入口，交给原生快捷键。
+chrome.action.onClicked.addListener(async (tab) => {
+  if (!tab || tab.windowId == null) return;
+  if (!(await hasContentScript(tab.id))) {
+    log('图标点击：该页面没有内容脚本（chrome:// 等），不做窗口全屏');
+    return;
+  }
   log('图标点击');
-  if (tab && tab.windowId != null) toggleWindowFullscreen(tab.windowId);
+  toggleWindowFullscreen(tab.windowId);
 });
 
 chrome.runtime.onMessage.addListener((message, sender) => {

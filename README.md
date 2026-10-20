@@ -64,7 +64,7 @@ https://raw.githubusercontent.com/beemo37/chrome-fullscreen-ext/main/userscript/
 | --- | --- |
 | `Alt+Shift+F` | 当前页面全屏 / 退出全屏 |
 | `Esc` | 退出全屏（浏览器原生行为） |
-| 点工具栏图标 | 兜底：内容脚本进不去的页面用窗口全屏接管 |
+| 点工具栏图标 | 窗口全屏兜底（仅普通网页；`chrome://` 页面不做，避免进得去出不来） |
 
 快捷键可在 `page-fullscreen.js` 顶部的 `KEY_CODE` / `NEEDS_ALT` / `NEEDS_SHIFT` 里改。
 
@@ -72,7 +72,9 @@ https://raw.githubusercontent.com/beemo37/chrome-fullscreen-ext/main/userscript/
 
 ## 已知限制
 
-- **`chrome://` 页面、新标签页、Chrome 应用商店、内置 PDF 查看器**：内容脚本无法注入，`Alt+Shift+F` 无反应。这些页面请用 `⌃⌘F` / `F11`，或点工具栏图标走兜底路径。
+- **`chrome://` 页面、新标签页、Chrome 应用商店、内置 PDF 查看器**：Chrome 禁止扩展向这些页面注入脚本，`Alt+Shift+F` 无反应，工具栏图标也不再生效（1.2 起）。这些页面请用 `⌃⌘F` / `F11` 原生全屏。
+
+  > 为什么图标在那里也不做：窗口全屏后 Esc 没有人上报（内容脚本不存在），工具栏图标又被全屏挡住，只能靠 `⌃⌘F` 才出得来。与其给个半成品入口，不如不做。
 - **本地 `file://` 页面**：需要在 `chrome://extensions` → 本扩展 → 详情里打开 **"允许访问文件网址"**。
 - **页面自身禁用全屏**（`Permissions-Policy: fullscreen=()`）：会自动退回窗口全屏兜底，会有动画。
 
@@ -88,5 +90,6 @@ userscript/          篡改猴用户脚本版（等价主路径，不需要装�
 
 ## 版本
 
+- **1.2** —— 工具栏图标只在有内容脚本的页面生效，`chrome://` 页面不再进入窗口全屏（避免进去之后 Esc 退不出来）。
 - **1.1** —— 加了按键认领机制：扩展和用户脚本（或两份扩展）同时启用时，一次按键只允许一个处理器动作，避免互相抵消导致快捷键失灵。
 - **1.0** —— 第一版。主路径改为 Fullscreen API，`Esc` 原生退出，窗口尺寸天然还原。

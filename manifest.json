@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "一键全屏",
-  "version": "1.1",
+  "version": "1.2",
   "description": "按 Alt+Shift+F 让当前页面全屏 / 退出，Esc 也可退出。",
   "icons": {
     "16": "icons/icon16.png",
@@ -21,8 +21,12 @@
   },
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
-      "js": ["page-fullscreen.js"],
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "page-fullscreen.js"
+      ],
       "run_at": "document_start",
       "all_frames": true
     }
