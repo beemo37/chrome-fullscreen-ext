@@ -187,6 +187,16 @@ chrome.runtime.onMessage.addListener((message, sender) => {
     return;
   }
 
+  // Alt+Shift+G：窗口全屏（跨页面、跨标签都保持），由内容脚本转发过来。
+  // 之所以不让内容脚本直接调，是因为这里要记账：进全屏前的尺寸/状态只有
+  // background 记下来，退出时才能还原成原样。
+  if (message.type === 'window-fullscreen-toggle') {
+    if (windowId == null) return;
+    log('Alt+Shift+G：切换窗口全屏');
+    toggleWindowFullscreen(windowId);
+    return;
+  }
+
   // 窗口全屏下的 Esc（含 ⌃⌘F / F11 的原生全屏）。
   // 判断依据是「窗口当前是不是 fullscreen」，不追查是谁进的全屏 ——
   // 只认自己进的全屏，原生全屏按 Esc 就没反应了。

@@ -13,14 +13,21 @@
 //
 // requestFullscreen 需要「用户手势激活」，这里的调用发生在真实 keydown 的
 // 处理过程中，激活是有的，浏览器认。
+//
+// 两种全屏各有一个快捷键：
+//   Alt+Shift+F —— 元素全屏（这里）。瞬切，但绑在当前文档上：跳转页面、
+//                  切标签就结束。适合看文档、翻 PPT。
+//   Alt+Shift+G —— 窗口全屏（background 里用 chrome.windows 做）。跨页面、
+//                  跨标签都保持，适合在 GitLab 这类会整页跳转的站点里长时间用。
 
-const KEY_CODE = 'KeyF'; // 物理按键 F，跟键盘布局无关
+const PAGE_KEY_CODE = 'KeyF'; // 元素全屏。物理按键，跟键盘布局无关
+const WINDOW_KEY_CODE = 'KeyG'; // 窗口全屏（交给 background 处理）
 const NEEDS_ALT = true;
 const NEEDS_SHIFT = true;
 
-function matchesShortcut(event) {
+function matchesShortcut(event, code) {
   return (
-    event.code === KEY_CODE &&
+    event.code === code &&
     event.altKey === NEEDS_ALT &&
     event.shiftKey === NEEDS_SHIFT &&
     !event.metaKey &&
@@ -36,16 +43,22 @@ function isPageFullscreen() {
 // 各自都 toggle 一遍会互相抵消 —— 一个调 exitFullscreen() 之后
 // document.fullscreenElement 立刻变 null，另一个读到「不是全屏」又去
 // requestFullscreen()，表现为快捷键失灵。用 DOM 上的时间戳认领，
-// 保证一次按键只动作一次。DOM 属性跨执行环境共享，油猴那边也认这同一个 key。
-const CLAIM_KEY = 'oneClickFullscreenAt';
+// 保证一次按键只动作一次。DOM 属性跨执行环境共享，油猴那边也认这个 key。
+//
+// 两个组合用各自的 key：先按 F 再按 G（或反过来）不会互相吞掉。
 const CLAIM_WINDOW_MS = 300;
+const CLAIM_KEYS = {
+  page: 'oneClickFullscreenAt', // 油猴脚本也用这个名字
+  window: 'oneClickWindowFullscreenAt'
+};
 
-function claimKeypress() {
+function claimKeypress(kind) {
   const el = document.documentElement;
+  const key = CLAIM_KEYS[kind];
   const now = Date.now();
-  const last = Number(el.dataset[CLAIM_KEY] || 0);
+  const last = Number(el.dataset[key] || 0);
   if (now - last < CLAIM_WINDOW_MS) return false;
-  el.dataset[CLAIM_KEY] = String(now);
+  el.dataset[key] = String(now);
   return true;
 }
 
@@ -75,11 +88,24 @@ async function togglePageFullscreen() {
 document.addEventListener(
   'keydown',
   (event) => {
-    if (event.repeat || !matchesShortcut(event)) return;
-    event.preventDefault();
-    event.stopPropagation();
-    if (!claimKeypress()) return; // 已经被另一个处理器认领，别重复 toggle
-    togglePageFullscreen();
+    if (event.repeat) return;
+
+    if (matchesShortcut(event, PAGE_KEY_CODE)) {
+      event.preventDefault();
+      event.stopPropagation();
+      if (!claimKeypress('page')) return; // 已被另一个处理器认领，别重复 toggle
+      togglePageFullscreen();
+      return;
+    }
+
+    // 窗口全屏：跨页面、跨标签都保持。用 chrome.windows 那套，交给 background，
+    // 因为它要记账（进全屏前的尺寸/状态）才能正确还原。
+    if (matchesShortcut(event, WINDOW_KEY_CODE)) {
+      event.preventDefault();
+      event.stopPropagation();
+      if (!claimKeypress('window')) return;
+      chrome.runtime.sendMessage({ type: 'window-fullscreen-toggle' });
+    }
   },
   true // 捕获阶段，先于页面自己的处理拿到按键
 );

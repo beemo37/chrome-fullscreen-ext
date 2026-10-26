@@ -1,23 +1,32 @@
 # 一键全屏（chrome-fullscreen-ext）
 
-一个极简的 Chrome 扩展：按 `Alt+Shift+F` 让当前**网页**全屏，再按一次或按 `Esc` 退出。
+一个极简的 Chrome 扩展，两种全屏各占一个快捷键：
+
+| 快捷键 | 机制 | 特点 | 适合 |
+| --- | --- | --- | --- |
+| `Alt+Shift+F` | 元素全屏（`element.requestFullscreen()`） | 瞬切；但绑在当前文档上，跳转页面/切标签就结束 | 看文档、翻 PPT |
+| `Alt+Shift+G` | 窗口全屏（`chrome.windows`） | 跨页面、跨标签都保持；有 macOS Space 动画 | GitLab 这类会整页跳转的站点 |
+
+两者都可以用 `Esc` 退出。
 
 ## 为什么不是 F11
 
 `chrome://` 的窗口全屏（F11 / ⌃⌘F）在 macOS 上会新建一个原生全屏 Space：有过渡动画（开了台前调度更明显），退出时浏览器还会写回窗口尺寸，导致窗口先缩成"还原尺寸"再还原，而且 `Esc` 根本不管用。
 
-这个扩展走的是网页自己的 **Fullscreen API**（`element.requestFullscreen()`），和网页 PPT 按 F 全屏是同一套机制：
+所以 `Alt+Shift+F` 走的是网页自己的 **Fullscreen API**（`element.requestFullscreen()`），和网页 PPT 按 F 全屏是同一套机制：
 
 - 瞬切，没有 Space 过渡动画
 - `Esc` 原生就能退出，不需要扩展补
 - 窗口 frame 自始至终没被改过，退出后尺寸和进全屏前**完全一致**
 
+它的软肋是**生命周期绑在文档上**：整页导航（比如 GitLab 搜索）、新建/切换标签都会结束全屏。这种场景用 `Alt+Shift+G`——它就是 F11 那一套，只是补上了 `Esc` 退出和退出后的尺寸还原。
+
 ## 安装
 
 ### 方式一：下载 Release 压缩包（推荐）
 
-1. 到本仓库的 [Releases](../../releases) 页面，下载 `chrome-fullscreen-ext-1.0.zip`
-2. 解压得到一个 `chrome-fullscreen-ext-1.0` 文件夹
+1. 到本仓库的 [Releases](../../releases) 页面，下载最新版的 `chrome-fullscreen-ext-<版本>.zip`
+2. 解压得到一个同名文件夹
 3. 打开 Chrome，地址栏输入 `chrome://extensions`
 4. 打开右上角的 **开发者模式**
 5. 点 **加载已解压的扩展程序**，选中刚解压出来的那个文件夹
@@ -62,17 +71,18 @@ https://raw.githubusercontent.com/beemo37/chrome-fullscreen-ext/main/userscript/
 
 | 操作 | 效果 |
 | --- | --- |
-| `Alt+Shift+F` | 当前页面全屏 / 退出全屏 |
-| `Esc` | 退出全屏（元素全屏浏览器原生处理；`⌃⌘F` / `F11` 的窗口全屏由扩展接管） |
+| `Alt+Shift+F` | 页面全屏（元素全屏）/ 退出。瞬切，但跳转页面、切标签会结束 |
+| `Alt+Shift+G` | 窗口全屏 / 退出。跨页面、跨标签都保持，进出有 Space 动画 |
+| `Esc` | 退出全屏（元素全屏浏览器原生处理；窗口全屏由扩展接管） |
 | 点工具栏图标 | 窗口全屏兜底（仅普通网页；`chrome://` 页面不做，避免进得去出不来） |
 
-快捷键可在 `page-fullscreen.js` 顶部的 `KEY_CODE` / `NEEDS_ALT` / `NEEDS_SHIFT` 里改。
+快捷键可在 [page-fullscreen.js](page-fullscreen.js) 顶部的 `PAGE_KEY_CODE`（`F`）/ `WINDOW_KEY_CODE`（`G`）/ `NEEDS_ALT` / `NEEDS_SHIFT` 里改。
 
 > **扩展和用户脚本只需装一个。** 两个同时启用时，1.1 起有按键认领机制兜底（一次按键只会有一个生效），但仍然建议只留一个，省得排查问题时混淆。
 
 ## 已知限制
 
-- **`chrome://` 页面、新标签页、Chrome 应用商店、内置 PDF 查看器**：Chrome 禁止扩展向这些页面注入脚本，`Alt+Shift+F` 无反应，工具栏图标也不再生效（1.2 起）。这些页面请用 `⌃⌘F` / `F11` 原生全屏。
+- **`chrome://` 页面、新标签页、Chrome 应用商店、内置 PDF 查看器**：Chrome 禁止扩展向这些页面注入脚本，两个快捷键都无反应，工具栏图标也不再生效（1.2 起）。这些页面请用 `⌃⌘F` / `F11` 原生全屏。
 
   > 为什么图标在那里也不做：窗口全屏后 Esc 没有人上报（内容脚本不存在），工具栏图标又被全屏挡住，只能靠 `⌃⌘F` 才出得来。与其给个半成品入口，不如不做。
 
@@ -91,6 +101,8 @@ userscript/          篡改猴用户脚本版（等价主路径，不需要装�
 ```
 
 ## 版本
+
+- **1.4** —— 拆成两个快捷键：`Alt+Shift+F` 页面全屏（瞬切），`Alt+Shift+G` 窗口全屏（跨页面、跨标签保持）。
 
 - **1.3** —— Esc 恢复接管 `⌃⌘F` / `F11` 进的原生窗口全屏（1.2 收紧成只认自己进的全屏，导致原生全屏按 Esc 无反应）。
 - **1.2** —— 工具栏图标只在有内容脚本的页面生效，`chrome://` 页面不再进入窗口全屏（避免进去之后 Esc 退不出来）。

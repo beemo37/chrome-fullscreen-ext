@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "一键全屏",
-  "version": "1.3",
-  "description": "按 Alt+Shift+F 让当前页面全屏 / 退出，Esc 也可退出。",
+  "version": "1.4",
+  "description": "Alt+Shift+F 页面全屏（瞬切），Alt+Shift+G 窗口全屏（跨页面保持），Esc 退出。",
   "icons": {
     "16": "icons/icon16.png",
     "32": "icons/icon32.png",
