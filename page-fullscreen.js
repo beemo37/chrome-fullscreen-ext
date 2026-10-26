@@ -15,13 +15,13 @@
 // 处理过程中，激活是有的，浏览器认。
 //
 // 两种全屏各有一个快捷键：
-//   Alt+Shift+F —— 元素全屏（这里）。瞬切，但绑在当前文档上：跳转页面、
-//                  切标签就结束。适合看文档、翻 PPT。
-//   Alt+Shift+G —— 窗口全屏（background 里用 chrome.windows 做）。跨页面、
+//   Alt+Shift+F —— 窗口全屏（background 里用 chrome.windows 做）。跨页面、
 //                  跨标签都保持，适合在 GitLab 这类会整页跳转的站点里长时间用。
+//   Alt+Shift+G —— 元素全屏（这里）。瞬切，但绑在当前文档上：跳转页面、
+//                  切标签就结束。适合看文档、翻 PPT。
 
-const PAGE_KEY_CODE = 'KeyF'; // 元素全屏。物理按键，跟键盘布局无关
-const WINDOW_KEY_CODE = 'KeyG'; // 窗口全屏（交给 background 处理）
+const WINDOW_KEY_CODE = 'KeyF'; // 窗口全屏（交给 background 处理）
+const PAGE_KEY_CODE = 'KeyG'; // 元素全屏。物理按键，跟键盘布局无关
 const NEEDS_ALT = true;
 const NEEDS_SHIFT = true;
 
@@ -48,7 +48,7 @@ function isPageFullscreen() {
 // 两个组合用各自的 key：先按 F 再按 G（或反过来）不会互相吞掉。
 const CLAIM_WINDOW_MS = 300;
 const CLAIM_KEYS = {
-  page: 'oneClickFullscreenAt', // 油猴脚本也用这个名字
+  page: 'oneClickPageFullscreenAt', // 用户脚本也用这个名字
   window: 'oneClickWindowFullscreenAt'
 };
 

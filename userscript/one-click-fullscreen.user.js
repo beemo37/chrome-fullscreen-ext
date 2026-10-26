@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         一键全屏（Alt+Shift+F）
+// @name         页面全屏（Alt+Shift+G）
 // @namespace    https://github.com/beemo37/chrome-fullscreen-ext
-// @version      1.1
-// @description  按 Alt+Shift+F 让当前网页全屏 / 退出；Esc 原生退出，窗口尺寸天然还原
+// @version      1.2
+// @description  按 Alt+Shift+G 让当前网页全屏 / 退出；Esc 原生退出，窗口尺寸天然还原
 // @author       beemo37
 // @homepageURL  https://github.com/beemo37/chrome-fullscreen-ext
 // @supportURL   https://github.com/beemo37/chrome-fullscreen-ext/issues
@@ -28,7 +28,7 @@
 (function () {
   'use strict';
 
-  const KEY_CODE = 'KeyF'; // 物理按键 F，与键盘布局无关
+  const KEY_CODE = 'KeyG'; // 物理按键 G，与键盘布局无关
   const NEEDS_ALT = true;
   const NEEDS_SHIFT = true;
 
@@ -41,7 +41,7 @@
   // document.fullscreenElement 立刻变 null，另一个读到「不是全屏」又去
   // requestFullscreen()，表现为快捷键失灵。用 DOM 上的时间戳认领，
   // 保证一次按键只动作一次。DOM 属性跨执行环境共享，扩展那边也认这同一个 key。
-  const CLAIM_KEY = 'oneClickFullscreenAt';
+  const CLAIM_KEY = 'oneClickPageFullscreenAt'; // 与扩展的 G 键共用一个认领标记
   const CLAIM_WINDOW_MS = 300;
 
   function claimKeypress() {

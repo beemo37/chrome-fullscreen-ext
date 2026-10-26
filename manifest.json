@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "一键全屏",
-  "version": "1.4",
-  "description": "Alt+Shift+F 页面全屏（瞬切），Alt+Shift+G 窗口全屏（跨页面保持），Esc 退出。",
+  "version": "1.5",
+  "description": "Alt+Shift+F 窗口全屏（跨页面保持），Alt+Shift+G 页面全屏（瞬切），Esc 退出。",
   "icons": {
     "16": "icons/icon16.png",
     "32": "icons/icon32.png",

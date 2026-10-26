@@ -4,22 +4,22 @@
 
 | 快捷键 | 机制 | 特点 | 适合 |
 | --- | --- | --- | --- |
-| `Alt+Shift+F` | 元素全屏（`element.requestFullscreen()`） | 瞬切；但绑在当前文档上，跳转页面/切标签就结束 | 看文档、翻 PPT |
-| `Alt+Shift+G` | 窗口全屏（`chrome.windows`） | 跨页面、跨标签都保持；有 macOS Space 动画 | GitLab 这类会整页跳转的站点 |
+| `Alt+Shift+F` | 窗口全屏（`chrome.windows`） | 跨页面、跨标签都保持；有 macOS Space 动画 | GitLab 这类会整页跳转的站点 |
+| `Alt+Shift+G` | 元素全屏（`element.requestFullscreen()`） | 瞬切；但绑在当前文档上，跳转页面/切标签就结束 | 看文档、翻 PPT |
 
 两者都可以用 `Esc` 退出。
 
-## 为什么不是 F11
+## 为什么需要两种
 
 `chrome://` 的窗口全屏（F11 / ⌃⌘F）在 macOS 上会新建一个原生全屏 Space：有过渡动画（开了台前调度更明显），退出时浏览器还会写回窗口尺寸，导致窗口先缩成"还原尺寸"再还原，而且 `Esc` 根本不管用。
 
-所以 `Alt+Shift+F` 走的是网页自己的 **Fullscreen API**（`element.requestFullscreen()`），和网页 PPT 按 F 全屏是同一套机制：
+所以 `Alt+Shift+G` 走的是网页自己的 **Fullscreen API**（`element.requestFullscreen()`），和网页 PPT 按 F 全屏是同一套机制：
 
 - 瞬切，没有 Space 过渡动画
 - `Esc` 原生就能退出，不需要扩展补
 - 窗口 frame 自始至终没被改过，退出后尺寸和进全屏前**完全一致**
 
-它的软肋是**生命周期绑在文档上**：整页导航（比如 GitLab 搜索）、新建/切换标签都会结束全屏。这种场景用 `Alt+Shift+G`——它就是 F11 那一套，只是补上了 `Esc` 退出和退出后的尺寸还原。
+它的软肋是**生命周期绑在文档上**：整页导航（比如 GitLab 搜索）、新建/切换标签都会结束全屏。这种场景用 `Alt+Shift+F`——它就是 F11 那一套，只是补上了 `Esc` 退出和退出后的尺寸还原。
 
 ## 安装
 
@@ -63,7 +63,7 @@ https://raw.githubusercontent.com/beemo37/chrome-fullscreen-ext/main/userscript/
 > `curl https://purge.jsdelivr.net/gh/beemo37/chrome-fullscreen-ext@main/userscript/one-click-fullscreen.user.js`，
 > 或者把链接里的 `@main` 换成具体的 commit hash / tag，那是不可变的、不会取到旧内容。
 
-它实现的是同一条主路径（`Alt+Shift+F` + `Esc` + 尺寸天然还原），但少两件事：没有工具栏图标入口；页面禁用 Fullscreen API 时没有窗口全屏兜底。本地 `file://` 页面需要在篡改猴设置里打开 **"允许访问文件网址"**。
+它实现的是元素全屏那条路径，快捷键与扩展统一为 `Alt+Shift+G`（`Esc` + 尺寸天然还原），但少两件事：没有工具栏图标入口；页面禁用 Fullscreen API 时没有窗口全屏兜底。本地 `file://` 页面需要在篡改猴设置里打开 **"允许访问文件网址"**。
 
 > 新版 Chrome 对用户脚本有额外限制：需要在 `chrome://extensions` 打开 **开发者模式**（部分版本显示为"允许用户脚本"开关），否则篡改猴装了脚本也不会执行。
 
@@ -71,12 +71,12 @@ https://raw.githubusercontent.com/beemo37/chrome-fullscreen-ext/main/userscript/
 
 | 操作 | 效果 |
 | --- | --- |
-| `Alt+Shift+F` | 页面全屏（元素全屏）/ 退出。瞬切，但跳转页面、切标签会结束 |
-| `Alt+Shift+G` | 窗口全屏 / 退出。跨页面、跨标签都保持，进出有 Space 动画 |
+| `Alt+Shift+F` | 窗口全屏 / 退出。跨页面、跨标签都保持，进出有 Space 动画 |
+| `Alt+Shift+G` | 页面全屏（元素全屏）/ 退出。瞬切，但跳转页面、切标签会结束 |
 | `Esc` | 退出全屏（元素全屏浏览器原生处理；窗口全屏由扩展接管） |
 | 点工具栏图标 | 窗口全屏兜底（仅普通网页；`chrome://` 页面不做，避免进得去出不来） |
 
-快捷键可在 [page-fullscreen.js](page-fullscreen.js) 顶部的 `PAGE_KEY_CODE`（`F`）/ `WINDOW_KEY_CODE`（`G`）/ `NEEDS_ALT` / `NEEDS_SHIFT` 里改。
+快捷键可在 [page-fullscreen.js](page-fullscreen.js) 顶部的 `WINDOW_KEY_CODE`（`F`）/ `PAGE_KEY_CODE`（`G`）/ `NEEDS_ALT` / `NEEDS_SHIFT` 里改。
 
 > **扩展和用户脚本只需装一个。** 两个同时启用时，1.1 起有按键认领机制兜底（一次按键只会有一个生效），但仍然建议只留一个，省得排查问题时混淆。
 
@@ -102,6 +102,7 @@ userscript/          篡改猴用户脚本版（等价主路径，不需要装�
 
 ## 版本
 
+- **1.5** —— 对调两个快捷键：`Alt+Shift+F` 窗口全屏（跨页面保持），`Alt+Shift+G` 页面全屏（瞬切）。用户脚本同步改为 `G`。
 - **1.4** —— 拆成两个快捷键：`Alt+Shift+F` 页面全屏（瞬切），`Alt+Shift+G` 窗口全屏（跨页面、跨标签保持）。
 
 - **1.3** —— Esc 恢复接管 `⌃⌘F` / `F11` 进的原生窗口全屏（1.2 收紧成只认自己进的全屏，导致原生全屏按 Esc 无反应）。
